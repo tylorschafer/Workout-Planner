@@ -7,54 +7,63 @@
 
 import SwiftUI
 
-struct ExerciseViewModel {
-    struct ExerciseSet: Identifiable {
-        let id: UUID
-        let weight: Double
-        let reps: Int
-        
-        var weightDisplay: String {
-            String(format: "%.2f", weight)
-        }
-    }
+final class ExerciseViewModel: ObservableObject {
+    @Published var exercise: Exercise
     
-    let name: String
-    let description: String?
-    let image: Image?
-    let sets: [ExerciseSet]
+    init(exercise: Exercise) {
+        self.exercise = exercise
+    }
 }
 
 struct ExerciseView: View {
-    let viewModel: ExerciseViewModel
+    @State var viewModel: ExerciseViewModel
+    
+    @State private var showEditView: Bool = false
     
     var body: some View {
         VStack(spacing: 16) {
-            Label(viewModel.name, systemImage: "dumbbell")
-            if let description = viewModel.description {
-                Text(description)
+            // Label(viewModel.exercise.name, systemImage: "dumbbell")
+            Text(viewModel.exercise.description)
+            
+            if let image = viewModel.exercise.image {
+                image
             }
             
-            if !viewModel.sets.isEmpty {
-                List(viewModel.sets) { set in
+            if !viewModel.exercise.sets.isEmpty {
+                List(viewModel.exercise.sets) { set in
                     setView(set)
                 }
             }
             Spacer()
         }
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(Text(viewModel.exercise.name))
+        .navigationBarItems(trailing: editButton)
+        .sheet(isPresented: $showEditView) {
+            EditExerciseView(exercise: $viewModel.exercise)
+        }
     }
     
-    private func setView(_ set: ExerciseViewModel.ExerciseSet) -> some View {
-        Text("\(set.weightDisplay) lbs x \(set.reps) reps")
+    private var editButton: some View {
+        Button(action: { showEditView = true }) {
+            Image(systemName: "pencil")
+        }
+    }
+    
+    private func setView(_ set: Exercise.ExerciseSet) -> some View {
+        Text("\(set.displayWeight) lbs x \(set.displayReps) reps")
     }
 }
 
 #Preview {
     let sets = [
-        ExerciseViewModel.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
-        ExerciseViewModel.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
-        ExerciseViewModel.ExerciseSet.init(id: .init(), weight: 20, reps: 20)
+        Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
+        Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
+        Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20)
     ]
-    let viewModel: ExerciseViewModel = .init(name: "Example Exercise", description: "This is just an example exercise. Real exercises will have detailed descriptions and images.", image: nil, sets: sets)
+    let viewModel: ExerciseViewModel = .init(exercise: Exercise(name: "Example Exercise", description: "This is just an example exercise. Real exercises will have detailed descriptions and images.", image: nil, sets: sets))
     
-    ExerciseView(viewModel: viewModel)
+    NavigationStack {
+        ExerciseView(viewModel: viewModel)
+    }
 }
