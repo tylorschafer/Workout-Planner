@@ -13,6 +13,7 @@ struct Exercise {
         let id: UUID
         var weight: Double
         var reps: Double
+        var isCompleted: Bool = false
         
         var displayWeight: String {
             displayNumber(for: weight)

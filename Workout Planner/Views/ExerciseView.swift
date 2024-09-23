@@ -7,40 +7,52 @@
 
 import SwiftUI
 
-final class ExerciseViewModel: ObservableObject {
-    @Published var exercise: Exercise
+struct SetView: View {
+    @Binding var set: Exercise.ExerciseSet
     
-    init(exercise: Exercise) {
-        self.exercise = exercise
+    var body: some View {
+        Button {
+            set.isCompleted.toggle()
+        } label: {
+            Text("\(set.displayWeight) lbs x \(set.displayReps) reps")
+        }
+        .padding()
+        .frame(maxWidth: 350)
+        .background(set.isCompleted ? Color.green : Color.white)
+        .border(.black)
     }
 }
 
 struct ExerciseView: View {
-    @State var viewModel: ExerciseViewModel
+    @Binding var exercise: Exercise
     
     @State private var showEditView: Bool = false
     
     var body: some View {
         VStack(spacing: 16) {
-            // Label(viewModel.exercise.name, systemImage: "dumbbell")
-            Text(viewModel.exercise.description)
+            Text(exercise.description)
             
-            if let image = viewModel.exercise.image {
+            if let image = exercise.image {
                 image
             }
             
-            if !viewModel.exercise.sets.isEmpty {
-                List(viewModel.exercise.sets) { set in
-                    setView(set)
+            if !exercise.sets.isEmpty {
+                Text("Sets")
+                    .bold()
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach($exercise.sets) { set in
+                        SetView(set: set)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
             }
             Spacer()
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle(Text(viewModel.exercise.name))
+        .navigationTitle(Text(exercise.name))
         .navigationBarItems(trailing: editButton)
         .sheet(isPresented: $showEditView) {
-            EditExerciseView(exercise: $viewModel.exercise)
+            EditExerciseView(exercise: $exercise)
         }
     }
     
@@ -56,14 +68,18 @@ struct ExerciseView: View {
 }
 
 #Preview {
-    let sets = [
-        Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
-        Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
-        Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20)
-    ]
-    let viewModel: ExerciseViewModel = .init(exercise: Exercise(name: "Example Exercise", description: "This is just an example exercise. Real exercises will have detailed descriptions and images.", image: nil, sets: sets))
+    @Previewable @State var exercise = Exercise(
+        name: "Example Exercise",
+        description: "This is just an example exercise. Real exercises will have detailed descriptions and images.",
+        image: nil,
+        sets: [
+            Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
+            Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
+            Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20)
+        ]
+    )
     
     NavigationStack {
-        ExerciseView(viewModel: viewModel)
+        ExerciseView(exercise: $exercise)
     }
 }
