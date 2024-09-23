@@ -41,18 +41,25 @@ struct EditExerciseView: View {
                             .foregroundStyle(.blue)
                     }
                 }
+                Button("Add New Set") {
+                    exercise.sets.append(Exercise.ExerciseSet(weight: 0.0, reps: 0.0))
+                }
             }
         }
+        
     }
 }
 
 #Preview {
-    let sets = [
-        Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
-        Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
-        Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20)
-    ]
-    let exercise = Exercise(name: "Exercise", description: "", sets: sets)
+    @Previewable @State var exercise = Exercise(
+        name: "Exercise",
+        description: "",
+        sets: [
+            Exercise.ExerciseSet.init(weight: 20, reps: 20),
+            Exercise.ExerciseSet.init(weight: 20, reps: 20),
+            Exercise.ExerciseSet.init(weight: 20, reps: 20)
+        ]
+    )
     
-    EditExerciseView(exercise: .constant(exercise))
+    EditExerciseView(exercise: $exercise)
 }

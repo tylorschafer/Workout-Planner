@@ -10,7 +10,7 @@ import SwiftUICore
 
 struct Exercise {
     struct ExerciseSet: Identifiable {
-        let id: UUID
+        let id: UUID = UUID()
         var weight: Double
         var reps: Double
         var isCompleted: Bool = false

@@ -15,11 +15,18 @@ struct SetView: View {
             set.isCompleted.toggle()
         } label: {
             Text("\(set.displayWeight) lbs x \(set.displayReps) reps")
+               .font(.body)
+               .padding(.vertical, 8)
+               .padding(.horizontal, 16)
         }
-        .padding()
-        .frame(maxWidth: 350)
-        .background(set.isCompleted ? Color.green : Color.white)
-        .border(.black)
+       .frame(maxWidth: 350)
+       .background(set.isCompleted ? Color.green.opacity(0.8) : Color.white)
+       .foregroundColor(set.isCompleted ?.white : .black)
+       .cornerRadius(8)
+       .overlay(
+            RoundedRectangle(cornerRadius: 8)
+               .stroke(Color.black, lineWidth: 1)
+        )
     }
 }
 
@@ -39,7 +46,7 @@ struct ExerciseView: View {
             if !exercise.sets.isEmpty {
                 Text("Sets")
                     .bold()
-                VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 8) {
                     ForEach($exercise.sets) { set in
                         SetView(set: set)
                             .frame(maxWidth: .infinity)
@@ -73,9 +80,9 @@ struct ExerciseView: View {
         description: "This is just an example exercise. Real exercises will have detailed descriptions and images.",
         image: nil,
         sets: [
-            Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
-            Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20),
-            Exercise.ExerciseSet.init(id: .init(), weight: 20, reps: 20)
+            Exercise.ExerciseSet.init(weight: 20, reps: 20),
+            Exercise.ExerciseSet.init(weight: 20, reps: 20),
+            Exercise.ExerciseSet.init(weight: 20, reps: 20)
         ]
     )
     
