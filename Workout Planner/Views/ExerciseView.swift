@@ -40,7 +40,11 @@ struct ExerciseView: View {
             Text(exercise.description)
             
             if let image = exercise.image {
-                image
+                Button {
+                    // allow user to pick an image from their photo album
+                } label: {
+                    image
+                }
             }
             
             if !exercise.sets.isEmpty {

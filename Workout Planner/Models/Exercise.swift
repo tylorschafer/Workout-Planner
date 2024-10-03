@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUICore
 
-struct Exercise {
+struct Exercise: Identifiable {
     struct ExerciseSet: Identifiable {
         let id: UUID = UUID()
         var weight: Double
@@ -27,7 +27,7 @@ struct Exercise {
             String(format: "%.2f", number)
         }
     }
-    
+    let id: UUID = UUID()
     var name: String
     var description: String
     var image: Image?
