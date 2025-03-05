@@ -30,9 +30,11 @@ struct WorkoutView: View {
             }
             .foregroundStyle(.primary)
             .sheet(isPresented: $shouldShowDetailView) {
-                // if let selectedExercise = Binding($selectedExercise) {
-                    // ExerciseView(exercise: selectedExercise)
-                // }
+                 if let selectedExercise = Binding($selectedExercise) {
+                     NavigationStack {
+                         ExerciseView(exercise: selectedExercise)
+                     }
+                 }
             }
         }
     }
