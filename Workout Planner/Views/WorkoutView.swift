@@ -62,5 +62,7 @@ struct WorkoutView: View {
         ]),
     ])
     
-    WorkoutView(viewModel: viewModel)
+    NavigationStack {
+        WorkoutView(viewModel: viewModel)
+    }
 }

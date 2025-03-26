@@ -18,35 +18,36 @@ struct EditExerciseView: View {
     @Binding var exercise: Exercise
 
     var body: some View {
-        Form {
-            Section(header: Text("Edit Exercise")) {
-                TextField("Name", text: $exercise.name)
-                TextField("Description", text: $exercise.description)
-            }
-            Section(header: Text("Sets and Reps")) {
-                ForEach(Array($exercise.sets.enumerated()), id: \.offset) { index, set in
-                    Text("Set #\(index + 1)")
-                        .bold()
-                    
-                    HStack {
-                        Text("Weight")
-                        TextField("Value", value: set.weight, formatter: formatter)
-                            .keyboardType(.numberPad)
-                            .foregroundStyle(.blue)
-                    }
-                    HStack {
-                        Text("Reps")
-                        TextField("Value", value: set.reps, formatter: formatter)
-                            .keyboardType(.numberPad)
-                            .foregroundStyle(.blue)
-                    }
+        NavigationStack {
+            Form {
+                Section(header: Text("Edit Exercise")) {
+                    TextField("Name", text: $exercise.name)
+                    TextField("Description", text: $exercise.description)
                 }
-                Button("Add New Set") {
-                    exercise.sets.append(Exercise.ExerciseSet(weight: 0.0, reps: 0.0))
+                Section(header: Text("Sets and Reps")) {
+                    ForEach(Array($exercise.sets.enumerated()), id: \.offset) { index, set in
+                        Text("Set #\(index + 1)")
+                            .bold()
+                        
+                        HStack {
+                            Text("Weight")
+                            TextField("Value", value: set.weight, formatter: formatter)
+                                .keyboardType(.numberPad)
+                                .foregroundStyle(.blue)
+                        }
+                        HStack {
+                            Text("Reps")
+                            TextField("Value", value: set.reps, formatter: formatter)
+                                .keyboardType(.numberPad)
+                                .foregroundStyle(.blue)
+                        }
+                    }
+                    Button("Add New Set") {
+                        exercise.sets.append(Exercise.ExerciseSet(weight: 0.0, reps: 0.0))
+                    }
                 }
             }
         }
-        
     }
 }
 
