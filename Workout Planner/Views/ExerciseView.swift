@@ -8,25 +8,53 @@
 import SwiftUI
 
 struct SetView: View {
-    @Binding var set: Exercise.ExerciseSet
-    
+    let set: Exercise.ExerciseSet
+    @State private var isCompleted: Bool = false
+
     var body: some View {
-        Button {
-            set.isCompleted.toggle()
-        } label: {
-            Text("\(set.displayWeight) lbs x \(set.displayReps) reps")
-               .font(.body)
-               .padding(.vertical, 8)
-               .padding(.horizontal, 16)
+        VStack {
+            Text("Weight: \(set.displayWeight) kg")
+                .font(.title2)
+                .bold()
+
+            Text("Reps: \(set.displayReps)")
+                .font(.body)
+
+            Spacer().frame(height: 10)
+
+            HStack {
+                Button(action: {
+                    isCompleted = false
+                }) {
+                    Text("Reset")
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(isCompleted ? Color.red : Color.blue)
+                        .clipShape(Capsule())
+                        .shadow(radius: 5)
+                }
+
+                Spacer()
+
+                Button(action: {
+                    // Action to mark as completed
+                    isCompleted.toggle()
+                }) {
+                    Text(isCompleted ? "Marked" : "Complete")
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(isCompleted ? Color.green : Color.gray)
+                        .clipShape(Capsule())
+                        .shadow(radius: 5)
+                }
+            }
+
         }
-       .frame(maxWidth: 350)
-       .background(set.isCompleted ? Color.green.opacity(0.8) : Color.white)
-       .foregroundColor(set.isCompleted ?.white : .black)
-       .cornerRadius(8)
-       .overlay(
-            RoundedRectangle(cornerRadius: 8)
-               .stroke(Color.black, lineWidth: 1)
-        )
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .background(Color.white.opacity(0.9))
+        .cornerRadius(18)
+        .shadow(color: Color.gray.opacity(0.3), radius: 10)
     }
 }
 
@@ -51,7 +79,7 @@ struct ExerciseView: View {
                 Text("Sets")
                     .bold()
                 VStack(alignment: .leading, spacing: 8) {
-                    ForEach($exercise.sets) { set in
+                    ForEach(exercise.sets) { set in
                         SetView(set: set)
                             .frame(maxWidth: .infinity)
                     }
