@@ -162,17 +162,7 @@ struct WorkoutView: View {
                     Spacer()
                     
                     Button(action: {
-                        // Edit action
-                    }) {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.white)
-                            .padding(8)
-                    }
-                    .glassEffect(.regular.tint(.blue.opacity(0.3)).interactive(), in: Circle())
-                    
-                    Button(action: {
-                        // More options
+                        // More options: Delete
                     }) {
                         Image(systemName: "ellipsis")
                             .font(.system(size: 14, weight: .medium))
