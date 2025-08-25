@@ -13,7 +13,7 @@ struct ExerciseView: View {
     
     var body: some View {
         ScrollView {
-            GlassEffectContainer(spacing: 16) {
+            GlassContainer(spacing: 16) {
                 VStack(spacing: 20) {
                     headerView
                     imageView
@@ -62,7 +62,7 @@ private extension ExerciseView {
                 .lineLimit(nil)
         }
         .padding(20)
-        .glassEffect(.regular.tint(.white.opacity(0.1)).interactive(), in: RoundedRectangle(cornerRadius: 20))
+        .glassCard()
     }
     
     @ViewBuilder
@@ -83,27 +83,26 @@ private extension ExerciseView {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .glassEffect(.regular.tint(.blue.opacity(0.5)).interactive())
+                        .glassCard(cornerRadius: 12, tintColor: .blue.opacity(0.5))
                 }
                 
                 LazyVStack(spacing: 12) {
-                    ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { index, set in
+                    ForEach(Array($exercise.sets.enumerated()), id: \.element.id) { index, setBinding in
                         HStack {
                             Text("\(index + 1)")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                                 .frame(width: 24, height: 24)
-                                .glassEffect(.regular.tint(.blue.opacity(0.6)).interactive(), in: Circle())
+                                .glassCard(cornerRadius: 12, tintColor: .blue.opacity(0.6))
                             
-                            SetView(set: set)
-                                .glassEffectID(set.id, in: exerciseNamespace)
+                            SetView(set: setBinding)
                         }
                     }
                 }
             }
             .padding(20)
-            .glassEffect(.regular.tint(.white.opacity(0.1)).interactive(), in: RoundedRectangle(cornerRadius: 20))
+            .glassCard()
         }
     }
     
@@ -119,7 +118,7 @@ private extension ExerciseView {
                     .frame(maxHeight: 200)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
             }
-            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 20))
+            .glassCard()
         }
     }
 }
@@ -128,7 +127,6 @@ private extension ExerciseView {
     @Previewable @State var exercise = Exercise(
         name: "Example Exercise",
         description: "This is just an example exercise. Real exercises will have detailed descriptions and images that help demonstrate proper form and technique.",
-        image: nil,
         sets: [
             Exercise.ExerciseSet(weight: 20, reps: 20),
             Exercise.ExerciseSet(weight: 25, reps: 18),

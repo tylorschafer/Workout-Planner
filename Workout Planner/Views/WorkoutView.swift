@@ -20,15 +20,11 @@ final class WorkoutViewModel: ObservableObject {
 }
 
 struct WorkoutView: View {
-    @Namespace private var workoutNamespace
     @ObservedObject var viewModel: WorkoutViewModel
-    @State var shouldShowDetailView: Bool = false
-    @State private var selectedExercise: Exercise?
-    @State private var selectedExerciseIndex: Int?
     
     var body: some View {
         ScrollView {
-            GlassEffectContainer(spacing: 16) {
+            GlassContainer(spacing: 16) {
                 VStack(spacing: 20) {
                     // Header Section
                     HStack {
@@ -51,7 +47,7 @@ struct WorkoutView: View {
                             .foregroundStyle(.white)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .glassEffect(.regular.tint(.blue.opacity(0.5)).interactive())
+                            .glassCard(cornerRadius: DesignSystem.CornerRadius.small, tintColor: DesignSystem.Colors.accentBlue)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
@@ -59,8 +55,17 @@ struct WorkoutView: View {
                     // Exercises List
                     LazyVStack(spacing: 12) {
                         ForEach(Array(viewModel.exercises.enumerated()), id: \.element.id) { index, exercise in
-                            exerciseCard(exercise, index: index)
-                                .glassEffectID(exercise.id, in: workoutNamespace)
+                            NavigationLink(destination: ExerciseView(
+                                exercise: Binding(
+                                    get: { viewModel.exercises[index] },
+                                    set: { newExercise in
+                                        viewModel.exercises[index] = newExercise
+                                    }
+                                )
+                            )) {
+                                exerciseCard(exercise, index: index)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 20)
@@ -73,13 +78,6 @@ struct WorkoutView: View {
         .preferredColorScheme(.dark)
         .navigationTitle("Workout")
         .navigationBarTitleDisplayMode(.large)
-        .sheet(isPresented: $shouldShowDetailView) {
-            if let selectedExercise = Binding($selectedExercise) {
-                NavigationStack {
-                    ExerciseView(exercise: selectedExercise)
-                }
-            }
-        }
     }
 }
 
@@ -87,14 +85,7 @@ struct WorkoutView: View {
 
 extension WorkoutView {
     private func exerciseCard(_ exercise: Exercise, index: Int) -> some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                selectedExercise = exercise
-                selectedExerciseIndex = index
-                shouldShowDetailView = true
-            }
-        } label: {
-            VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 16) {
                 // Exercise Header
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
@@ -127,7 +118,7 @@ extension WorkoutView {
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .glassEffect(.regular.tint(.gray.opacity(0.4)).interactive(), in: RoundedRectangle(cornerRadius: 12))
+                    .glassCard(cornerRadius: DesignSystem.CornerRadius.small, tintColor: DesignSystem.Colors.accentGray)
                 }
                 
                 // Sets Preview
@@ -158,13 +149,11 @@ extension WorkoutView {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                     }
-                    .glassEffect(.regular.tint(.green.opacity(0.6)).interactive())
+                    .glassCard(cornerRadius: DesignSystem.CornerRadius.medium, tintColor: DesignSystem.Colors.accentGreen)
                 }
             }
-            .padding(20)
-        }
-        .buttonStyle(.plain)
-        .glassEffect(.regular.tint(.white.opacity(0.1)).interactive(), in: RoundedRectangle(cornerRadius: 20))
+        .padding(20)
+        .glassCard()
         .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 6)
     }
     
@@ -175,7 +164,7 @@ extension WorkoutView {
                 .fontWeight(.semibold)
                 .foregroundStyle(.white)
                 .frame(width: 16, height: 16)
-                .glassEffect(.regular.tint(.blue.opacity(0.5)), in: Circle())
+                .glassCard(cornerRadius: 8, tintColor: DesignSystem.Colors.accentBlue)
             
             Text("\(set.displayWeight)")
                 .font(.caption)
@@ -193,7 +182,7 @@ extension WorkoutView {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .glassEffect(.regular.tint(.white.opacity(0.15)).interactive(), in: Capsule())
+        .glassCard(cornerRadius: 12, tintColor: DesignSystem.Colors.glassTint.opacity(0.8))
     }
 }
 
