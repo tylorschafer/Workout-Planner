@@ -7,118 +7,136 @@
 
 import SwiftUI
 
-struct SetView: View {
-    let set: Exercise.ExerciseSet
-    @State private var isCompleted: Bool = false
-
-    var body: some View {
-        VStack {
-            Text("Weight: \(set.displayWeight) kg")
-                .font(.title2)
-                .bold()
-
-            Text("Reps: \(set.displayReps)")
-                .font(.body)
-
-            Spacer().frame(height: 10)
-
-            HStack {
-                Button(action: {
-                    isCompleted = false
-                }) {
-                    Text("Reset")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(isCompleted ? Color.red : Color.blue)
-                        .clipShape(Capsule())
-                        .shadow(radius: 5)
-                }
-
-                Spacer()
-
-                Button(action: {
-                    // Action to mark as completed
-                    isCompleted.toggle()
-                }) {
-                    Text(isCompleted ? "Marked" : "Complete")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(isCompleted ? Color.green : Color.gray)
-                        .clipShape(Capsule())
-                        .shadow(radius: 5)
-                }
-            }
-
-        }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .center)
-        .background(Color.white.opacity(0.9))
-        .cornerRadius(18)
-        .shadow(color: Color.gray.opacity(0.3), radius: 10)
-    }
-}
-
 struct ExerciseView: View {
     @Binding var exercise: Exercise
-    
     @State private var showEditView: Bool = false
     
     var body: some View {
-        VStack(spacing: 16) {
-            Text(exercise.description)
-            
-            if let image = exercise.image {
-                Button {
-                    // allow user to pick an image from their photo album
-                } label: {
-                    image
+        ScrollView {
+            GlassEffectContainer(spacing: 16) {
+                VStack(spacing: 20) {
+                    headerView
+                    imageView
+                    setsSection
+                    Spacer(minLength: 100)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
             }
-            
-            if !exercise.sets.isEmpty {
-                Text("Sets")
-                    .bold()
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(exercise.sets) { set in
-                        SetView(set: set)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-            }
-            Spacer()
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle(Text(exercise.name))
-        .navigationBarItems(trailing: editButton)
+        .background(Color.black.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle(exercise.name)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: { showEditView = true }) {
+                    Image(systemName: "pencil.circle.fill")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.glass)
+            }
+        }
         .sheet(isPresented: $showEditView) {
             EditExerciseView(exercise: $exercise)
         }
     }
+    @Namespace private var exerciseNamespace
+}
+
+private extension ExerciseView {
+    private var headerView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Description")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+                Spacer()
+            }
+            
+            Text(exercise.description)
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .lineLimit(nil)
+        }
+        .padding(20)
+        .glassEffect(.regular.tint(.black.opacity(0.3)), in: RoundedRectangle(cornerRadius: 20))
+    }
     
-    private var editButton: some View {
-        Button(action: { showEditView = true }) {
-            Image(systemName: "pencil")
+    @ViewBuilder
+    private var setsSection: some View {
+        if !exercise.sets.isEmpty {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("Sets")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                    
+                    Spacer()
+                    
+                    Text("\(exercise.sets.count) sets")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .glassEffect(.regular.tint(.white.opacity(0.1)))
+                }
+                
+                LazyVStack(spacing: 12) {
+                    ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { index, set in
+                        HStack {
+                            Text("\(index + 1)")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.white)
+                                .frame(width: 24, height: 24)
+                                .glassEffect(.regular.tint(.blue.opacity(0.4)), in: Circle())
+                            
+                            SetView(set: set)
+                                .glassEffectID(set.id, in: exerciseNamespace)
+                        }
+                    }
+                }
+            }
+            .padding(20)
+            .glassEffect(.regular.tint(.black.opacity(0.3)), in: RoundedRectangle(cornerRadius: 20))
         }
     }
     
-    private func setView(_ set: Exercise.ExerciseSet) -> some View {
-        Text("\(set.displayWeight) lbs x \(set.displayReps) reps")
+    @ViewBuilder
+    private var imageView: some View {
+        if let image = exercise.image {
+            Button {
+                // Allow user to pick an image from their photo album
+            } label: {
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+            }
+            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 20))
+        }
     }
 }
 
 #Preview {
     @Previewable @State var exercise = Exercise(
         name: "Example Exercise",
-        description: "This is just an example exercise. Real exercises will have detailed descriptions and images.",
+        description: "This is just an example exercise. Real exercises will have detailed descriptions and images that help demonstrate proper form and technique.",
         image: nil,
         sets: [
-            Exercise.ExerciseSet.init(weight: 20, reps: 20),
-            Exercise.ExerciseSet.init(weight: 20, reps: 20),
-            Exercise.ExerciseSet.init(weight: 20, reps: 20)
+            Exercise.ExerciseSet(weight: 20, reps: 20),
+            Exercise.ExerciseSet(weight: 25, reps: 18),
+            Exercise.ExerciseSet(weight: 30, reps: 15)
         ]
     )
     
     NavigationStack {
         ExerciseView(exercise: $exercise)
     }
+    .preferredColorScheme(.dark)
 }
