@@ -1,7 +1,7 @@
 
 # Workout Planner
 
-A SwiftUI-based workout planning and tracking application built to explore modern Swift development patterns and glassmorphism design principles.
+A SwiftUI-based workout planning and tracking application built to explore modern Swift development patterns.
 
 https://github.com/user-attachments/assets/f6e0203f-99ed-4ada-9052-b4df1c7c5779
 
