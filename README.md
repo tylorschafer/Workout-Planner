@@ -89,7 +89,3 @@ This project serves as a learning exercise for:
 ## Contributing
 
 This is a personal learning project. Feel free to explore the code and adapt patterns for your own projects.
-
-## License
-
-This project is for educational purposes. Please respect any third-party dependencies and their respective licenses.
