@@ -21,8 +21,8 @@ struct SetView: View {
             }
         }
         .padding(20)
-        .glassEffect(.regular.tint(.black.opacity(0.2)), in: RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+        .glassEffect(.regular.tint(.white.opacity(0.1)).interactive(), in: RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 6)
     }
 }
 
@@ -32,11 +32,11 @@ private extension SetView {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Weight")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.7))
                 Text("\(set.displayWeight) kg")
                     .font(.title3)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
             }
             
             Spacer()
@@ -44,11 +44,11 @@ private extension SetView {
             VStack(alignment: .trailing, spacing: 4) {
                 Text("Reps")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.7))
                 Text("\(set.displayReps)")
                     .font(.title3)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
             }
         }
     }
@@ -70,7 +70,7 @@ private extension SetView {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
-        .glassEffect(.regular.tint(.red.opacity(0.4)).interactive())
+        .glassEffect(.regular.tint(.red.opacity(0.6)).interactive())
         .scaleEffect(isCompleted ? 1.0 : 0.95)
         .animation(.easeInOut(duration: 0.2), value: isCompleted)
     }
@@ -95,7 +95,7 @@ private extension SetView {
         }
         .glassEffect(
             .regular
-                .tint(isCompleted ? .green.opacity(0.5) : .gray.opacity(0.3))
+                .tint(isCompleted ? .green.opacity(0.6) : .gray.opacity(0.4))
                 .interactive()
         )
         .scaleEffect(isCompleted ? 1.05 : 1.0)

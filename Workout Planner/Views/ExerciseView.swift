@@ -52,17 +52,17 @@ private extension ExerciseView {
                 Text("Description")
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
                 Spacer()
             }
             
             Text(exercise.description)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.7))
                 .lineLimit(nil)
         }
         .padding(20)
-        .glassEffect(.regular.tint(.black.opacity(0.3)), in: RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular.tint(.white.opacity(0.1)).interactive(), in: RoundedRectangle(cornerRadius: 20))
     }
     
     @ViewBuilder
@@ -73,16 +73,17 @@ private extension ExerciseView {
                     Text("Sets")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.white)
                     
                     Spacer()
                     
                     Text("\(exercise.sets.count) sets")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .glassEffect(.regular.tint(.white.opacity(0.1)))
+                        .glassEffect(.regular.tint(.blue.opacity(0.5)).interactive())
                 }
                 
                 LazyVStack(spacing: 12) {
@@ -93,7 +94,7 @@ private extension ExerciseView {
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                                 .frame(width: 24, height: 24)
-                                .glassEffect(.regular.tint(.blue.opacity(0.4)), in: Circle())
+                                .glassEffect(.regular.tint(.blue.opacity(0.6)).interactive(), in: Circle())
                             
                             SetView(set: set)
                                 .glassEffectID(set.id, in: exerciseNamespace)
@@ -102,7 +103,7 @@ private extension ExerciseView {
                 }
             }
             .padding(20)
-            .glassEffect(.regular.tint(.black.opacity(0.3)), in: RoundedRectangle(cornerRadius: 20))
+            .glassEffect(.regular.tint(.white.opacity(0.1)).interactive(), in: RoundedRectangle(cornerRadius: 20))
         }
     }
     
