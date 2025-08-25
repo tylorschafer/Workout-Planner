@@ -12,18 +12,19 @@ final class WorkoutViewModel: ObservableObject {
         self.exercises = exercises
     }
     
+    var totalSets: Int {
+        exercises.reduce(0) { $0 + $1.sets.count }
+    }
+    
     @Published var exercises: [Exercise]
 }
 
 struct WorkoutView: View {
     @ObservedObject var viewModel: WorkoutViewModel
-    @State var shouldShowDetailView: Bool = false
-    @State private var selectedExercise: Exercise?
-    @State private var selectedExerciseIndex: Int?
     
     var body: some View {
         ScrollView {
-            GlassEffectContainer(spacing: 16) {
+            GlassContainer(spacing: 16) {
                 VStack(spacing: 20) {
                     // Header Section
                     HStack {
@@ -31,21 +32,22 @@ struct WorkoutView: View {
                             Text("Today's Workout")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(.white)
                             
                             Text("\(viewModel.exercises.count) exercises")
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.white.opacity(0.7))
                         }
                         
                         Spacer()
                         
-                        Text("\(totalSets) sets")
+                        Text("\(viewModel.totalSets) sets")
                             .font(.caption)
+                            .fontWeight(.medium)
                             .foregroundStyle(.white)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .glassEffect(.regular.tint(.blue.opacity(0.4)))
+                            .glassCard(cornerRadius: DesignSystem.CornerRadius.small, tintColor: DesignSystem.Colors.accentBlue)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
@@ -53,8 +55,17 @@ struct WorkoutView: View {
                     // Exercises List
                     LazyVStack(spacing: 12) {
                         ForEach(Array(viewModel.exercises.enumerated()), id: \.element.id) { index, exercise in
-                            exerciseCard(exercise, index: index)
-                                .glassEffectID(exercise.id, in: workoutNamespace)
+                            NavigationLink(destination: ExerciseView(
+                                exercise: Binding(
+                                    get: { viewModel.exercises[index] },
+                                    set: { newExercise in
+                                        viewModel.exercises[index] = newExercise
+                                    }
+                                )
+                            )) {
+                                exerciseCard(exercise, index: index)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 20)
@@ -67,43 +78,27 @@ struct WorkoutView: View {
         .preferredColorScheme(.dark)
         .navigationTitle("Workout")
         .navigationBarTitleDisplayMode(.large)
-        .sheet(isPresented: $shouldShowDetailView) {
-            if let selectedExercise = Binding($selectedExercise) {
-                NavigationStack {
-                    ExerciseView(exercise: selectedExercise)
-                }
-            }
-        }
     }
-    
-    @Namespace private var workoutNamespace
-    
-    private var totalSets: Int {
-        viewModel.exercises.reduce(0) { $0 + $1.sets.count }
-    }
-    
+}
+
+// MARK: - Card
+
+extension WorkoutView {
     private func exerciseCard(_ exercise: Exercise, index: Int) -> some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                selectedExercise = exercise
-                selectedExerciseIndex = index
-                shouldShowDetailView = true
-            }
-        } label: {
-            VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 16) {
                 // Exercise Header
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(exercise.name)
                             .font(.headline)
                             .fontWeight(.semibold)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(.white)
                             .multilineTextAlignment(.leading)
                         
                         if !exercise.description.isEmpty {
                             Text(exercise.description)
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.white.opacity(0.7))
                                 .lineLimit(2)
                                 .multilineTextAlignment(.leading)
                         }
@@ -119,15 +114,11 @@ struct WorkoutView: View {
                         
                         Text("sets")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.white.opacity(0.6))
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .glassEffect(.regular.tint(.gray.opacity(0.3)), in: RoundedRectangle(cornerRadius: 12))
-                    
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(.secondary)
+                    .glassCard(cornerRadius: DesignSystem.CornerRadius.small, tintColor: DesignSystem.Colors.accentGray)
                 }
                 
                 // Sets Preview
@@ -151,32 +142,19 @@ struct WorkoutView: View {
                             Image(systemName: "play.fill")
                                 .font(.system(size: 12, weight: .medium))
                             Text("Start")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(.system(size: 14, weight: .semibold))
                         }
+                        .frame(maxWidth: .infinity)
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                     }
-                    .glassEffect(.regular.tint(.green.opacity(0.4)).interactive())
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        // More options: Delete
-                    }) {
-                        Image(systemName: "ellipsis")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(.white)
-                            .padding(8)
-                    }
-                    .glassEffect(.regular.tint(.gray.opacity(0.3)).interactive(), in: Circle())
+                    .glassCard(cornerRadius: DesignSystem.CornerRadius.medium, tintColor: DesignSystem.Colors.accentGreen)
                 }
             }
-            .padding(20)
-        }
-        .buttonStyle(.plain)
-        .glassEffect(.regular.tint(.black.opacity(0.3)).interactive(), in: RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+        .padding(20)
+        .glassCard()
+        .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 6)
     }
     
     private func setChip(_ set: Exercise.ExerciseSet, index: Int) -> some View {
@@ -186,25 +164,25 @@ struct WorkoutView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.white)
                 .frame(width: 16, height: 16)
-                .glassEffect(.regular.tint(.blue.opacity(0.5)), in: Circle())
+                .glassCard(cornerRadius: 8, tintColor: DesignSystem.Colors.accentBlue)
             
             Text("\(set.displayWeight)")
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundStyle(.primary)
+                .foregroundStyle(.white)
             
             Text("×")
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.6))
             
             Text("\(set.displayReps)")
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundStyle(.primary)
+                .foregroundStyle(.white)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
-        .glassEffect(.regular.tint(.white.opacity(0.1)), in: Capsule())
+        .glassCard(cornerRadius: 12, tintColor: DesignSystem.Colors.glassTint.opacity(0.8))
     }
 }
 

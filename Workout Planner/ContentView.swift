@@ -24,7 +24,9 @@ struct ContentView: View {
             ]),
         ])
         
-        WorkoutView(viewModel: viewModel)
+        NavigationStack {
+            WorkoutView(viewModel: viewModel)
+        }
     }
 
     private func addItem() {
