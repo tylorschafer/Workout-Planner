@@ -8,7 +8,7 @@ A SwiftUI-based workout planning and tracking application built to explore moder
 - **Exercise Tracking**: Track sets, reps, and weights for each exercise
 - **Interactive Set Completion**: Mark individual sets as completed with visual feedback
 - **Exercise Details**: View detailed information and descriptions for each exercise
-- **Modern UI**: Glassmorphism design with dark theme support
+- **Modern UI**: iOS 26 Glass API and other modern technologies explored.
 
 ## Architecture
 
