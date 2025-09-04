@@ -4,7 +4,6 @@
 //
 //  Created by Tylor Schafer on 10/2/24.
 //
-
 import SwiftUI
 
 final class WorkoutViewModel: ObservableObject {
@@ -21,84 +20,171 @@ final class WorkoutViewModel: ObservableObject {
 
 struct WorkoutView: View {
     @ObservedObject var viewModel: WorkoutViewModel
+    @State private var selectedExercise: Exercise?
+    @State private var selectedExerciseIndex: Int?
     
     var body: some View {
         ScrollView {
-            GlassContainer(spacing: 16) {
-                VStack(spacing: 20) {
-                    // Header Section
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Today's Workout")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.white)
-                            
-                            Text("\(viewModel.exercises.count) exercises")
-                                .font(.subheadline)
-                                .foregroundStyle(.white.opacity(0.7))
-                        }
-                        
-                        Spacer()
-                        
-                        Text("\(viewModel.totalSets) sets")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .glassCard(cornerRadius: DesignSystem.CornerRadius.small, tintColor: DesignSystem.Colors.accentBlue)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
-                    
-                    // Exercises List
-                    LazyVStack(spacing: 12) {
-                        ForEach(Array(viewModel.exercises.enumerated()), id: \.element.id) { index, exercise in
-                            NavigationLink(destination: ExerciseView(
-                                exercise: Binding(
-                                    get: { viewModel.exercises[index] },
-                                    set: { newExercise in
-                                        viewModel.exercises[index] = newExercise
-                                    }
-                                )
-                            )) {
-                                exerciseCard(exercise, index: index)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    Spacer(minLength: 100)
+            LazyVStack(spacing: 24) {
+                workoutHeader
+                exercisesList
+            }
+            .padding()
+            .padding(.bottom, 100)
+        }
+        .background(
+            LinearGradient(
+                colors: [
+                    Color(.tertiarySystemBackground),
+                    Color(.systemGray4).opacity(0.5),
+                    Color(.systemMint.withProminence(.secondary))
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+        )
+        .navigationTitle("Today's Workout")
+        .navigationBarTitleDisplayMode(.large)
+        .sheet(item: $selectedExercise) { exercise in
+            NavigationStack {
+                if let selectedIndex = selectedExerciseIndex {
+                    ExerciseView(exercise: $viewModel.exercises[selectedIndex])
+                } else {
+                    ExerciseView(exercise: .constant(exercise))
                 }
             }
         }
-        .background(Color.black.ignoresSafeArea())
-        .preferredColorScheme(.dark)
-        .navigationTitle("Workout")
-        .navigationBarTitleDisplayMode(.large)
     }
-}
-
-// MARK: - Card
-
-extension WorkoutView {
-    private func exerciseCard(_ exercise: Exercise, index: Int) -> some View {
+    
+    @Namespace private var workoutNamespace
+    
+    private var totalSets: Int {
+        viewModel.exercises.reduce(0) { $0 + $1.sets.count }
+    }
+    
+    private var completedSets: Int {
+        viewModel.exercises.reduce(0) { total, exercise in
+            total + exercise.sets.filter(\.isCompleted).count
+        }
+    }
+    
+    private var workoutHeader: some View {
+        VStack(spacing: 20) {
+            // Progress Overview
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Progress")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.primary)
+                    
+                    Text("\(completedSets) of \(totalSets) sets completed")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                
+                Spacer()
+                
+                // Circular Progress
+                ZStack {
+                    Circle()
+                        .stroke(Color(.systemGray5), lineWidth: 8)
+                        .frame(width: 60, height: 60)
+                    
+                    Circle()
+                        .trim(from: 0, to: totalSets > 0 ? Double(completedSets) / Double(totalSets) : 0)
+                        .stroke(.mint.gradient, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                        .frame(width: 60, height: 60)
+                        .rotationEffect(.degrees(-90))
+                        .animation(.spring(response: 0.8), value: completedSets)
+                    
+                    Text("\(totalSets > 0 ? Int((Double(completedSets) / Double(totalSets)) * 100) : 0)%")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
+                }
+            }
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(.regularMaterial)
+                    .shadow(color: Color(.systemGray4).opacity(0.3), radius: 8, x: 0, y: 4)
+            )
+            
+            // Quick Stats
+            HStack(spacing: 16) {
+                statCard(title: "Exercises", value: "\(viewModel.exercises.count)", icon: "dumbbell.fill", color: .orange)
+                statCard(title: "Total Sets", value: "\(totalSets)", icon: "list.number", color: .blue)
+                statCard(title: "Completed", value: "\(completedSets)", icon: "checkmark.circle.fill", color: .mint)
+            }
+        }
+    }
+    
+    private func statCard(title: String, value: String, icon: String, color: Color) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundStyle(color.gradient)
+            
+            Text(value)
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(.primary)
+            
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(.regularMaterial)
+                .shadow(color: Color(.systemGray4).opacity(0.2), radius: 4, x: 0, y: 2)
+        )
+    }
+    
+    private var exercisesList: some View {
         VStack(alignment: .leading, spacing: 16) {
+            Text("Exercises")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(.primary)
+            
+            LazyVStack(spacing: 12) {
+                ForEach(Array(viewModel.exercises.enumerated()), id: \.element.id) { index, exercise in
+                    exerciseCard(exercise, index: index)
+                        .transition(.asymmetric(
+                            insertion: .scale.combined(with: .opacity),
+                            removal: .scale.combined(with: .opacity)
+                        ))
+                }
+            }
+        }
+    }
+    
+    private func exerciseCard(_ exercise: Exercise, index: Int) -> some View {
+        Button {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                selectedExercise = exercise
+                selectedExerciseIndex = index
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 16) {
                 // Exercise Header
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(exercise.name)
-                            .font(.headline)
+                            .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.leading)
                         
                         if !exercise.description.isEmpty {
                             Text(exercise.description)
-                                .font(.caption)
-                                .foregroundStyle(.white.opacity(0.7))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                                 .lineLimit(2)
                                 .multilineTextAlignment(.leading)
                         }
@@ -106,25 +192,34 @@ extension WorkoutView {
                     
                     Spacer()
                     
-                    VStack(spacing: 4) {
-                        Text("\(exercise.sets.count)")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundStyle(.white)
+                    // Exercise completion badge
+                    let completedSets = exercise.sets.filter(\.isCompleted).count
+                    HStack(spacing: 4) {
+                        if completedSets == exercise.sets.count && !exercise.sets.isEmpty {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                        } else {
+                            Image(systemName: "circle.dashed")
+                                .foregroundStyle(.orange)
+                        }
                         
-                        Text("sets")
-                            .font(.caption2)
-                            .foregroundStyle(.white.opacity(0.6))
+                        Text("\(completedSets)/\(exercise.sets.count)")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.primary)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .glassCard(cornerRadius: DesignSystem.CornerRadius.small, tintColor: DesignSystem.Colors.accentGray)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemGray5).opacity(0.8))
+                    )
                 }
                 
                 // Sets Preview
                 if !exercise.sets.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
+                        HStack(spacing: 10) {
                             ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { setIndex, set in
                                 setChip(set, index: setIndex + 1)
                             }
@@ -132,62 +227,74 @@ extension WorkoutView {
                         .padding(.horizontal, 2)
                     }
                 }
-                
-                // Quick Actions
-                HStack(spacing: 12) {
-                    Button(action: {
-                        // Quick start action
-                    }) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "play.fill")
-                                .font(.system(size: 12, weight: .medium))
-                            Text("Start")
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                    }
-                    .glassCard(cornerRadius: DesignSystem.CornerRadius.medium, tintColor: DesignSystem.Colors.accentGreen)
-                }
             }
-        .padding(20)
-        .glassCard()
-        .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 6)
+            .padding(20)
+        }
+        .buttonStyle(.plain)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.regularMaterial)
+                .shadow(color: Color(.systemGray4).opacity(0.15), radius: 6, x: 0, y: 3)
+        )
     }
     
     private func setChip(_ set: Exercise.ExerciseSet, index: Int) -> some View {
-        HStack(spacing: 4) {
-            Text("\(index)")
-                .font(.caption2)
-                .fontWeight(.semibold)
-                .foregroundStyle(.white)
-                .frame(width: 16, height: 16)
-                .glassCard(cornerRadius: 8, tintColor: DesignSystem.Colors.accentBlue)
+        HStack(spacing: 6) {
+            // Set number with completion indicator
+            ZStack {
+                Circle()
+                    .fill(set.isCompleted ? Color.mint : Color(.systemGray3))
+                    .frame(width: 24, height: 24)
+                
+                if set.isCompleted {
+                    Image(systemName: "checkmark")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                } else {
+                    Text("\(index)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                }
+            }
             
-            Text("\(set.displayWeight)")
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundStyle(.white)
-            
-            Text("×")
-                .font(.caption2)
-                .foregroundStyle(.white.opacity(0.6))
-            
-            Text("\(set.displayReps)")
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundStyle(.white)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(set.displayWeight)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.primary)
+                    Text("lbs")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                
+                HStack(spacing: 4) {
+                    Text(set.displayReps)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.primary)
+                    Text("reps")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .glassCard(cornerRadius: 12, tintColor: DesignSystem.Colors.glassTint.opacity(0.8))
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemGray6).opacity(0.8))
+                .stroke(
+                    set.isCompleted ? Color.mint.opacity(0.6) : Color(.systemGray4).opacity(0.3),
+                    lineWidth: 1
+                )
+        )
     }
 }
 
 // MARK: - Extensions
-
 extension WorkoutView {
     private func exerciseRow(_ exercise: Exercise) -> some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -210,28 +317,31 @@ extension WorkoutView {
         Exercise(
             name: "Dumbbell Curls",
             description: "Bicep strengthening exercise focusing on controlled movement",
+            image: nil,
             sets: [
-                Exercise.ExerciseSet(weight: 15, reps: 12),
-                Exercise.ExerciseSet(weight: 20, reps: 10),
-                Exercise.ExerciseSet(weight: 25, reps: 8)
+                Exercise.ExerciseSet(weight: 15, reps: 12, isCompleted: true),
+                Exercise.ExerciseSet(weight: 20, reps: 10, isCompleted: true),
+                Exercise.ExerciseSet(weight: 25, reps: 8, isCompleted: false)
             ]
         ),
         Exercise(
             name: "Hammer Curls",
             description: "Neutral grip curl targeting brachialis and brachioradialis",
+            image: nil,
             sets: [
-                Exercise.ExerciseSet(weight: 12, reps: 15),
-                Exercise.ExerciseSet(weight: 15, reps: 12),
-                Exercise.ExerciseSet(weight: 18, reps: 10)
+                Exercise.ExerciseSet(weight: 12, reps: 15, isCompleted: false),
+                Exercise.ExerciseSet(weight: 15, reps: 12, isCompleted: false),
+                Exercise.ExerciseSet(weight: 18, reps: 10, isCompleted: false)
             ]
         ),
         Exercise(
             name: "Overhead Press",
             description: "Compound movement for shoulder and core strength",
+            image: nil,
             sets: [
-                Exercise.ExerciseSet(weight: 45, reps: 8),
-                Exercise.ExerciseSet(weight: 50, reps: 6),
-                Exercise.ExerciseSet(weight: 55, reps: 4)
+                Exercise.ExerciseSet(weight: 45, reps: 8, isCompleted: true),
+                Exercise.ExerciseSet(weight: 50, reps: 6, isCompleted: true),
+                Exercise.ExerciseSet(weight: 55, reps: 4, isCompleted: true)
             ]
         ),
     ])
@@ -239,5 +349,4 @@ extension WorkoutView {
     NavigationStack {
         WorkoutView(viewModel: viewModel)
     }
-    .preferredColorScheme(.dark)
 }
