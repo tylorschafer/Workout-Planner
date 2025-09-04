@@ -3,7 +3,7 @@
 
 A SwiftUI-based workout planning and tracking application built to explore modern Swift development patterns.
 
-https://github.com/user-attachments/assets/f6e0203f-99ed-4ada-9052-b4df1c7c5779
+<img width="704" height="706" alt="Screenshot 2025-09-03 at 10 53 07 PM" src="https://github.com/user-attachments/assets/f76a2b1d-0280-4127-a3d7-1cb3df6106d1" />
 
 ## Features
 
