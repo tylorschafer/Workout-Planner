@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct SetView: View {
-    let set: Exercise.ExerciseSet
-    @State private var isCompleted: Bool = false
+    @Binding var set: Exercise.ExerciseSet
 
     var body: some View {
         VStack(spacing: 16) {
@@ -20,9 +19,8 @@ struct SetView: View {
                 doneButton
             }
         }
-        .padding(20)
-        .glassEffect(.regular.tint(.black.opacity(0.2)), in: RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+        .padding(DesignSystem.Spacing.xl)
+        .glassCard()
     }
 }
 
@@ -32,11 +30,11 @@ private extension SetView {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Weight")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text("\(set.displayWeight) kg")
+                    .foregroundStyle(.white.opacity(0.7))
+                Text("\(set.displayWeight) lbs")
                     .font(.title3)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
             }
             
             Spacer()
@@ -44,19 +42,20 @@ private extension SetView {
             VStack(alignment: .trailing, spacing: 4) {
                 Text("Reps")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.7))
                 Text("\(set.displayReps)")
                     .font(.title3)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
             }
         }
+        .padding(.horizontal)
     }
     
     private var resetButton: some View {
         Button {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                isCompleted = false
+            withAnimation(DesignSystem.Animation.standard) {
+                set.isCompleted = false
             }
         } label: {
             HStack(spacing: 6) {
@@ -70,19 +69,19 @@ private extension SetView {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
-        .glassEffect(.regular.tint(.red.opacity(0.4)).interactive())
-        .scaleEffect(isCompleted ? 1.0 : 0.95)
-        .animation(.easeInOut(duration: 0.2), value: isCompleted)
+        .glassCard(tintColor: DesignSystem.Colors.accentRed)
+        .scaleEffect(set.isCompleted ? 1.0 : 0.95)
+        .animation(DesignSystem.Animation.quick, value: set.isCompleted)
     }
     
     private var doneButton: some View {
         Button {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                isCompleted.toggle()
+            withAnimation(DesignSystem.Animation.standard) {
+                set.isCompleted.toggle()
             }
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+                Image(systemName: set.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 14, weight: .medium))
                 Text("Complete")
                     .font(.system(size: 15, weight: .medium))
@@ -93,18 +92,15 @@ private extension SetView {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
         }
-        .glassEffect(
-            .regular
-                .tint(isCompleted ? .green.opacity(0.5) : .gray.opacity(0.3))
-                .interactive()
-        )
-        .scaleEffect(isCompleted ? 1.05 : 1.0)
-        .animation(.easeInOut(duration: 0.2), value: isCompleted)
+        .glassCard(tintColor: set.isCompleted ? DesignSystem.Colors.accentGreen : DesignSystem.Colors.accentGray)
+        .scaleEffect(set.isCompleted ? 1.05 : 1.0)
+        .animation(DesignSystem.Animation.quick, value: set.isCompleted)
     }
 }
 
 #Preview {
-    let set = Exercise.ExerciseSet(weight: 100, reps: 10)
+    @Previewable @State var set = Exercise.ExerciseSet(weight: 100, reps: 10)
     
-    SetView(set: set)
+    SetView(set: $set)
+        .background(.black)
 }

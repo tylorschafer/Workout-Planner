@@ -11,6 +11,10 @@ final class WorkoutViewModel: ObservableObject {
         self.exercises = exercises
     }
     
+    var totalSets: Int {
+        exercises.reduce(0) { $0 + $1.sets.count }
+    }
+    
     @Published var exercises: [Exercise]
 }
 
@@ -174,7 +178,7 @@ struct WorkoutView: View {
                         Text(exercise.name)
                             .font(.title3)
                             .fontWeight(.semibold)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(.white)
                             .multilineTextAlignment(.leading)
                         
                         if !exercise.description.isEmpty {

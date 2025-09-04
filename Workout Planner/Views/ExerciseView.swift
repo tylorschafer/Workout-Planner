@@ -15,7 +15,7 @@ struct ExerciseView: View {
     
     var body: some View {
         ScrollView {
-            GlassEffectContainer(spacing: 16) {
+            GlassContainer(spacing: 16) {
                 VStack(spacing: 20) {
                     headerView
                     imageView
@@ -89,17 +89,17 @@ private extension ExerciseView {
                 Text("Description")
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(.white)
                 Spacer()
             }
             
             Text(exercise.description)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white.opacity(0.7))
                 .lineLimit(nil)
         }
         .padding(20)
-        .glassEffect(.regular.tint(.black.opacity(0.3)), in: RoundedRectangle(cornerRadius: 20))
+        .glassCard()
     }
     
     private var startWorkoutSection: some View {
@@ -170,36 +170,36 @@ private extension ExerciseView {
                     Text("Sets")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.white)
                     
                     Spacer()
                     
                     Text("\(exercise.sets.count) sets")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .glassEffect(.regular.tint(.white.opacity(0.1)))
+                        .glassCard(cornerRadius: 12, tintColor: .blue.opacity(0.5))
                 }
                 
                 LazyVStack(spacing: 12) {
-                    ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { index, set in
+                    ForEach(Array($exercise.sets.enumerated()), id: \.element.id) { index, setBinding in
                         HStack {
                             Text("\(index + 1)")
                                 .font(.caption)
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                                 .frame(width: 24, height: 24)
-                                .glassEffect(.regular.tint(.blue.opacity(0.4)), in: Circle())
+                                .glassCard(cornerRadius: 12, tintColor: .blue.opacity(0.6))
                             
-                            SetView(set: set)
-                                .glassEffectID(set.id, in: exerciseNamespace)
+                            SetView(set: setBinding)
                         }
                     }
                 }
             }
             .padding(20)
-            .glassEffect(.regular.tint(.black.opacity(0.3)), in: RoundedRectangle(cornerRadius: 20))
+            .glassCard()
         }
     }
     
@@ -215,7 +215,7 @@ private extension ExerciseView {
                     .frame(maxHeight: 200)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
             }
-            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 20))
+            .glassCard()
         }
     }
 }
@@ -224,7 +224,6 @@ private extension ExerciseView {
     @Previewable @State var exercise = Exercise(
         name: "Example Exercise",
         description: "This is just an example exercise. Real exercises will have detailed descriptions and images that help demonstrate proper form and technique.",
-        image: nil,
         sets: [
             Exercise.ExerciseSet(weight: 20, reps: 20),
             Exercise.ExerciseSet(weight: 25, reps: 18),
